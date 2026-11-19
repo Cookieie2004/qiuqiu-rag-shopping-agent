@@ -525,6 +525,31 @@ def _filter_products(products: list[dict], exclusions: list[str]) -> list[dict]:
     return filtered
 
 
+_BUDGET_CAP = re.compile(
+    r"(?:预算(?:上限)?\s*[：:]?\s*|不超过\s*|最多\s*)(\d+(?:\.\d+)?)(?![\d.])"
+    r"(?!\s*(?:元\s*)?(?:万|千|百|到|至|以上|起|[-~～—]))"
+    r"|(?<![\d.])(\d+(?:\.\d+)?)\s*元\s*(?:以内|以下|之内)"
+)
+_CATALOG_CATEGORIES = ("美妆护肤", "数码电子", "服饰运动", "食品饮料")
+_MAX_PRODUCTS = 5
+_REFILL_PRODUCTS = 20
+
+
+def _build_bounded_filters(query: str, budget: float, exclusions: list[str]) -> dict:
+    clauses = [{"price_max": {"$lte": budget}}, {"price_max": {"$gt": 0}}]
+    categories = [category for category in _CATALOG_CATEGORIES if category in query]
+    if len(categories) == 1:
+        clauses.append({"category": categories[0]})
+    if exclusions:
+        clauses.append({"brand": {"$nin": sorted(set(exclusions))}})
+    return {"$and": clauses}
+
+
+def _within_budget(product: dict, budget: float) -> bool:
+    price = product.get("price_max")
+    return isinstance(price, (int, float)) and 0 < price <= budget
+
+
 def _build_context(query: str, search_query: str, llm_exclusions: list[str] = None) -> tuple[str, list[dict], list[dict], str]:
     """检索商品并构建 prompt context，返回 (context_text, products, chunks, search_query)
 
@@ -532,36 +557,46 @@ def _build_context(query: str, search_query: str, llm_exclusions: list[str] = No
         llm_exclusions: LLM 从对话历史中提取的排除关键词（由 _rewrite_query 返回）
     """
 
-    start = time.perf_counter()
-    result = cached_retrieve(search_query, n_products=5, n_chunks=8)
-    products = result["products"]
+    exclusions = list(dict.fromkeys(
+        term.removesuffix("品牌").strip()
+        for term in (llm_exclusions or []) + _extract_exclusions(query)
+        if term.removesuffix("品牌").strip()
+    ))
+    budget_match = _BUDGET_CAP.search(query)
+    budget = float(budget_match.group(1) or budget_match.group(2)) if budget_match else None
+    filters = _build_bounded_filters(query, budget, exclusions) if budget is not None else None
+
+    retrieval_options = {"filters": filters} if filters else {}
+    result = cached_retrieve(search_query, n_products=_MAX_PRODUCTS, n_chunks=8, **retrieval_options)
+    products = _filter_products(result["products"], exclusions)
     chunks = result["chunks"]
-    logger.info(
-        "RAG 检索完成 query=%r search_query=%r products=%d chunks=%d 耗时 %.2fs",
-        query, search_query,
-        len(products),
-        len(chunks),
-        time.perf_counter() - start,
-    )
 
-    # 反选过滤：LLM 提取的排除词（覆盖历史对话）+ 正则兜底（当前 query）
-    regex_exclusions = _extract_exclusions(query)
-    # 合并去重，LLM 排除词优先
-    seen = set()
-    exclusions = []
-    for kw in (llm_exclusions or []) + regex_exclusions:
-        if kw not in seen:
-            exclusions.append(kw)
-            seen.add(kw)
-    if exclusions:
-        logger.info("排除条件（LLM=%s + 正则=%s → 合并=%s）", llm_exclusions, regex_exclusions, exclusions)
-        products = _filter_products(products, exclusions)
-        # 同时过滤 chunks（只保留未被排除的商品的 chunks）
-        kept_ids = {p["id"] for p in products}
-        chunks = [c for c in chunks if c.get("product_id") in kept_ids]
-        logger.info("过滤后: products=%d chunks=%d", len(products), len(chunks))
+    if budget is not None:
+        products = [product for product in products if _within_budget(product, budget)]
+        if len(products) < _MAX_PRODUCTS:
+            try:
+                refill = cached_retrieve(
+                    search_query, n_products=_REFILL_PRODUCTS, n_chunks=8, filters=filters
+                )
+            except TimeoutError:
+                logger.warning("Budget-constrained refill timed out; retaining first-pass products")
+                if not products:
+                    raise
+            else:
+                merged = {product["id"]: product for product in products}
+                for product in _filter_products(refill["products"], exclusions):
+                    if _within_budget(product, budget):
+                        merged.setdefault(product["id"], product)
+                products = list(merged.values())[:_MAX_PRODUCTS]
+                chunks = list({
+                    chunk["chunk_id"]: chunk for chunk in chunks + refill["chunks"]
+                }.values())
+        logger.info("Budget-constrained RAG: cap=%s selected=%d", budget, len(products))
 
-    # 构建商品信息文本
+    if exclusions or budget is not None:
+        kept_ids = {product["id"] for product in products}
+        chunks = [chunk for chunk in chunks if chunk.get("product_id") in kept_ids]
+
     parts = []
     for i, p in enumerate(products, 1):
         price_str = f"¥{p['price_min']}"

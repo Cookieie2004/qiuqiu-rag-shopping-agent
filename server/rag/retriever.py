@@ -41,14 +41,18 @@ def _cache_key(query: str, n_products: int, n_chunks: int) -> str:
     norm = _normalize_query(query)
     return f"{norm}|{n_products}|{n_chunks}"
 
-def cached_retrieve(query: str, n_products: int = 3, n_chunks: int = 5) -> dict:
+def cached_retrieve(
+    query: str, n_products: int = 3, n_chunks: int = 5, *, filters: dict | None = None
+) -> dict:
     """带 LRU 缓存的 retrieve 包装"""
     key = _cache_key(query, n_products, n_chunks)
+    if filters:
+        key += "|" + json.dumps(filters, sort_keys=True, ensure_ascii=False)
     if key in _retrieve_cache:
         _retrieve_cache.move_to_end(key)
         logger.info("RAG 缓存命中 query=%r", query)
         return _retrieve_cache[key]
-    result = retrieve(query, n_products=n_products, n_chunks=n_chunks)
+    result = retrieve(query, n_products=n_products, n_chunks=n_chunks, filters=filters)
     _retrieve_cache[key] = result
     if len(_retrieve_cache) > _RETRIEVE_CACHE_MAX:
         _retrieve_cache.popitem(last=False)
@@ -382,7 +386,9 @@ def _filter_by_dominant_subcategory(products: list[dict]) -> list[dict]:
     return same_cat
 
 
-def retrieve(query: str, n_products: int = 3, n_chunks: int = 5) -> dict:
+def retrieve(
+    query: str, n_products: int = 3, n_chunks: int = 5, *, filters: dict | None = None
+) -> dict:
     """
     综合检索：先找商品，再找相关 chunks 补充信息。
 
@@ -402,7 +408,8 @@ def retrieve(query: str, n_products: int = 3, n_chunks: int = 5) -> dict:
             subcat_filter = {"sub_category": detected_subcat}
 
     # 粗召回：多检索一些，给 reranker 留余量
-    products = search_products(expanded_query, n_results=max(n_products + 5, 10), where=subcat_filter)
+    where = {"$and": [subcat_filter, filters]} if subcat_filter and filters else subcat_filter or filters
+    products = search_products(expanded_query, n_results=max(n_products + 5, 10), where=where)
 
     # 品类过滤：去除跨品类噪音
     # 别名查询 → 跳过（找特定商品）
