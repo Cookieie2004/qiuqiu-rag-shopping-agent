@@ -1,0 +1,10 @@
+fastapi==0.115.9
+uvicorn[standard]==0.34.0
+sse-starlette==2.2.1
+openai==1.82.0
+chromadb==0.6.3
+pydantic>=2.10,<2.14
+python-dotenv==1.1.0
+sherpa-onnx==1.13.2
+numpy>=1.26
+sentence-transformers>=2.2

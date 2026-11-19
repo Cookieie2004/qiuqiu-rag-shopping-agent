@@ -1,0 +1,21 @@
+<resources>
+    <color name="app_background">#F5F5F5</color>
+    <color name="app_chat_body">#FAFAFA</color>
+    <color name="app_surface">#FFFFFF</color>
+    <color name="app_input_background">#F5F5F5</color>
+    <color name="app_ai_bubble">#FFFFFF</color>
+    <color name="app_text">#1A1A1A</color>
+    <color name="app_muted_text">#666666</color>
+    <color name="app_hint_text">#999999</color>
+    <color name="app_disabled_text">#BBBBBB</color>
+    <color name="app_primary">#00A878</color>
+    <color name="app_primary_light">#E6F7F2</color>
+    <color name="app_primary_dark">#007A58</color>
+    <color name="app_border">#F0F0F0</color>
+    <color name="app_badge">#FF4444</color>
+    <color name="app_star">#F59E0B</color>
+    <color name="app_disabled_button">#E0E0E0</color>
+    <color name="app_highlight_bg">#FFF8E1</color>
+    <color name="app_highlight_title">#B8860B</color>
+    <color name="ic_launcher_background">#E8F5E9</color>
+</resources>

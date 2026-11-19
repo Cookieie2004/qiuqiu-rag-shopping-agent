@@ -1,0 +1,112 @@
+{
+  "_note": "Android 版本 · 主色 #00A878 已定稿 · 如后续开发 iOS 版本需重新适配平台规范",
+
+  "color": {
+    "primary": "#00A878",
+    "primary_light": "#E6F7F2",
+    "primary_dark": "#007A58",
+    "text_primary": "#1A1A1A",
+    "text_secondary": "#666666",
+    "text_hint": "#999999",
+    "text_disabled": "#BBBBBB",
+    "bg_page": "#F5F5F5",
+    "bg_card": "#FFFFFF",
+    "bg_input": "#F5F5F5",
+    "bg_bubble_ai": "#F5F5F5",
+    "border": "#F0F0F0",
+    "price": "primary",
+    "badge": "#FF4444",
+    "star": "#F59E0B"
+  },
+
+  "typography": {
+    "nav_title": { "size": 17, "weight": "600" },
+    "section_title": { "size": 14, "weight": "600" },
+    "body": { "size": 14, "weight": "400", "line_height": 1.6 },
+    "body_sm": { "size": 13, "weight": "400", "line_height": 1.6 },
+    "caption": { "size": 12, "weight": "400" },
+    "caption_sm": { "size": 11, "weight": "400" },
+    "price_large": { "size": 26, "weight": "700" },
+    "price_card": { "size": 15, "weight": "700" },
+    "label": { "size": 12, "weight": "500" }
+  },
+
+  "spacing": {
+    "page_horizontal": 16,
+    "page_vertical": 12,
+    "card_padding": 10,
+    "section_gap": 8,
+    "item_gap": 10,
+    "chip_gap": 5
+  },
+
+  "radius": {
+    "card": 14,
+    "card_sm": 10,
+    "button": 12,
+    "button_sm": 8,
+    "chip": 8,
+    "avatar": 9999,
+    "input": 22,
+    "tag": 4,
+    "bubble_ai": [4, 16, 16, 16],
+    "bubble_user": [16, 4, 16, 16]
+  },
+
+  "size": {
+    "avatar_nav": 32,
+    "avatar_msg": 30,
+    "tab_bar_height": 64,
+    "nav_height": 52,
+    "status_bar_height": 44,
+    "card_width": 130,
+    "card_img_height": 104,
+    "cart_item_img": 72,
+    "send_btn": 38,
+    "tab_btn": 34
+  },
+
+  "shadow": {
+    "card": "0 2px 10px rgba(0,0,0,0.08)",
+    "card_sm": "0 1px 4px rgba(0,0,0,0.05)",
+    "device": "0 24px 60px rgba(0,0,0,0.18)"
+  },
+
+  "component": {
+    "product_card": {
+      "width": 130,
+      "img_height": 104,
+      "name_max_lines": 2,
+      "price_color": "primary",
+      "btn_label": "查看详情"
+    },
+    "chat_bubble_ai": {
+      "bg": "bg_bubble_ai",
+      "max_width_ratio": 0.72,
+      "radius": [4, 16, 16, 16]
+    },
+    "chat_bubble_user": {
+      "bg": "primary",
+      "text_color": "#FFFFFF",
+      "max_width_ratio": 0.65,
+      "radius": [16, 4, 16, 16]
+    },
+    "quick_chip": {
+      "bg": "primary_light",
+      "text_color": "primary",
+      "padding": [3, 10],
+      "radius": 8,
+      "font_size": 12
+    },
+    "tab_bar": {
+      "height": 64,
+      "tabs": ["对话", "购物车"],
+      "active_color": "primary",
+      "inactive_color": "#BBBBBB"
+    },
+    "detail_buy_btn": {
+      "phase_1": { "state": "disabled", "label": "去购买", "sublabel": "敬请期待" },
+      "phase_2": { "state": "active", "label": "加入购物车" }
+    }
+  }
+}

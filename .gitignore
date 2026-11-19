@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Env
+.env
+.env.local
+
+# Claude Code
+CLAUDE.md
+
+# Data
+*.pkl
+*.bin
+data/chroma_db/
+*.pdf
+tmp/
+
+# iOS
+client/ios/build/
+client/ios/Pods/
+*.xcworkspace
+
+# Android
+client/android/local.properties
+client/android/.kotlin/
+client/android/build/
+client/android/app/build/
+client/android/.gradle/
+
+# Local dev files
+local/
+/.worktrees/
+/models/
+data/vector_db/
+sucai/
+
+# 不入仓库的文档
+docs/设计文档.md
+docs/说明文档.md
+docs/工作日志.md
+
+# 展示视频项目（非项目代码）
+video/
