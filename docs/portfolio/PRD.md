@@ -1,6 +1,6 @@
 # 球球 RAG 智能导购 PRD
 
-**版本 v1.1 · 2026-11-19 · 现有 MVP 复盘评审稿**
+**版本 v1.1 · 2026-6-19 **
 
 [交互原型 · Android 核心流程](https://www.figma.com/design/VIk4IyS8BLG0YSm3lpXi3R?node-id=9-29) · [源码](https://github.com/pingfangww/qiuqiu-rag-shopping-agent) · [验收用例](acceptance.csv)
 
